@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>医学资讯素材库</title>
+<style>
+:root{--bg:#f5f7f9;--card:#fff;--ink:#1a2332;--sub:#6b7686;--line:#e6eaf0;--teal:#0e9384;--teal-bg:#e6f6f4}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+.wrap{max-width:960px;margin:0 auto;padding:0 16px}
+header{background:linear-gradient(135deg,#0e9384,#0b6e63);color:#fff;padding:36px 0 28px}
+header h1{font-size:26px;letter-spacing:1px}
+header p{opacity:.85;font-size:14px;margin-top:6px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;padding:16px 0 0}
+.tab{padding:6px 14px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-size:14px;cursor:pointer;color:var(--sub);white-space:nowrap}
+.tab.active{background:var(--teal);border-color:var(--teal);color:#fff}
+.tab .c{opacity:.7;font-size:12px;margin-left:4px}
+.toolbar{position:sticky;top:0;background:var(--bg);padding:12px 0;z-index:10;border-bottom:1px solid var(--line)}
+.search-row{display:flex;gap:8px;flex-wrap:wrap}
+#q{flex:1;min-width:200px;padding:9px 14px;border:1px solid var(--line);border-radius:8px;font-size:14px;background:var(--card);outline:none}
+#q:focus{border-color:var(--teal)}
+select{padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:14px;background:var(--card);color:var(--ink)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.chip{padding:3px 10px;border-radius:999px;font-size:12px;background:var(--card);border:1px solid var(--line);color:var(--sub);cursor:pointer}
+.chip.active{background:var(--teal-bg);border-color:var(--teal);color:var(--teal)}
+#count{font-size:13px;color:var(--sub);padding:10px 2px 0}
+.list{padding:12px 0 40px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:10px;transition:box-shadow .15s}
+.card:hover{box-shadow:0 2px 10px rgba(20,40,60,.08)}
+.card a.t{color:var(--ink);text-decoration:none;font-size:16px;font-weight:600}
+.card a.t:hover{color:var(--teal)}
+.meta{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--sub);margin-top:6px;align-items:center}
+.badge{padding:1px 8px;border-radius:4px;font-size:12px;background:var(--teal-bg);color:var(--teal)}
+.tag{padding:1px 8px;border-radius:4px;font-size:12px;background:#f0f2f5;color:var(--sub)}
+.summary{font-size:14px;color:#3d4856;margin-top:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.stats{font-size:12px;color:var(--sub);margin-top:6px}
+.stats span{margin-right:12px}
+#more{display:block;margin:20px auto;padding:10px 32px;border:1px solid var(--teal);color:var(--teal);background:var(--card);border-radius:8px;font-size:14px;cursor:pointer}
+#more:hover{background:var(--teal-bg)}
+.empty{text-align:center;color:var(--sub);padding:60px 0}
+footer{text-align:center;font-size:12px;color:var(--sub);padding:20px 0 30px;border-top:1px solid var(--line)}
+@media(max-width:600px){header h1{font-size:20px}.card a.t{font-size:15px}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <h1>医学资讯素材库</h1>
+  <p id="subtitle"></p>
+</div></header>
+<div class="wrap">
+  <nav class="tabs" id="tabs"></nav>
+  <div class="toolbar">
+    <div class="search-row">
+      <input id="q" type="search" placeholder="搜索标题、摘要、作者…">
+      <select id="sort">
+        <option value="date">按最新</option>
+        <option value="hot">按热度</option>
+      </select>
+    </div>
+    <div class="chips" id="chips"></div>
+    <div id="count"></div>
+  </div>
+  <div class="list" id="list"></div>
+  <button id="more" style="display:none">加载更多</button>
+  <div class="empty" id="empty" style="display:none">没有匹配的内容</div>
+</div>
+<footer>数据迁移自飞书多维表格 · 静态站点，无 AI 额度限制</footer>
+<script src="data.js"></script>
+<script>
+const PLATFORMS=['全部','行业网站','公众号','B站','小红书','抖音','视频号','YouTube'];
+const HOT={行业网站:[],公众号:['阅读','点赞','在看'],B站:['播放'],小红书:['点赞','收藏','评论'],抖音:['点赞','评论','分享'],视频号:['点赞','评论','转发'],YouTube:[]};
+let state={p:'全部',q:'',tag:'',sort:'date',page:1};
+const PAGE=60;
+const $=id=>document.getElementById(id);
+const esc=s=>s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmtNum=n=>n>=10000?(n/10000).toFixed(1).replace(/\.0$/,'')+'万':n;
+
+// subtitle
+const dates=DATA.map(x=>x.d).filter(Boolean).sort();
+$('subtitle').textContent=`共 ${DATA.length} 条素材 · ${dates[0]||''} ~ ${dates[dates.length-1]||''}`;
+
+// tabs
+const counts={};DATA.forEach(x=>counts[x.p]=(counts[x.p]||0)+1);
+$('tabs').innerHTML=PLATFORMS.map(p=>{
+  const c=p==='全部'?DATA.length:(counts[p]||0);
+  return `<button class="tab" data-p="${p}">${p}<span class="c">${c}</span></button>`;
+}).join('');
+$('tabs').addEventListener('click',e=>{
+  const b=e.target.closest('.tab');if(!b)return;
+  state.p=b.dataset.p;state.tag='';state.page=1;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t===b));
+  renderChips();render();
+});
+document.querySelector('.tab').classList.add('active');
+
+// tag chips for current platform
+function renderChips(){
+  const pool=state.p==='全部'?DATA:DATA.filter(x=>x.p===state.p);
+  const tc={};pool.forEach(x=>x.g.forEach(g=>tc[g]=(tc[g]||0)+1));
+  const tags=Object.entries(tc).sort((a,b)=>b[1]-a[1]).slice(0,20);
+  $('chips').innerHTML=tags.length?tags.map(([g,c])=>`<button class="chip${g===state.tag?' active':''}" data-g="${esc(g)}">${esc(g)} ${c}</button>`).join(''):'';
+}
+$('chips').addEventListener('click',e=>{
+  const b=e.target.closest('.chip');if(!b)return;
+  state.tag=state.tag===b.dataset.g?'':b.dataset.g;state.page=1;
+  document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('active',c.dataset.g===state.tag));
+  render();
+});
+
+function filtered(){
+  const q=state.q.toLowerCase();
+  let r=DATA.filter(x=>
+    (state.p==='全部'||x.p===state.p)&&
+    (!state.tag||x.g.includes(state.tag))&&
+    (!q||x.t.toLowerCase().includes(q)||x.s.toLowerCase().includes(q)||x.a.toLowerCase().includes(q))
+  );
+  if(state.sort==='hot'){
+    const hot=p=>{const k=HOT[p]||[];return k.length?k[0]:null};
+    r=[...r].sort((a,b)=>{const ka=hot(a.p),kb=hot(b.p);return ((kb?b.n[kb]:0)||0)-((ka?a.n[ka]:0)||0)});
+  }
+  return r;
+}
+
+function card(x){
+  const stats=Object.entries(x.n).filter(([,v])=>v>0).map(([k,v])=>`<span>${k} ${fmtNum(v)}</span>`).join('');
+  const tags=x.g.map(g=>`<span class="tag">${esc(g)}</span>`).join('');
+  const ext=Object.entries(x.e||{}).filter(([,v])=>v).map(([k,v])=>`<span>${k} ${esc(v)}</span>`).join('');
+  const inner=`<a class="t" ${x.u?`href="${esc(x.u)}" target="_blank" rel="noopener"`:''}>${esc(x.t)}</a>
+    <div class="meta"><span class="badge">${x.p}</span>${x.a?`<span>${esc(x.a)}</span>`:''}${x.d?`<span>${x.d}</span>`:''}${tags}${ext}</div>
+    ${x.s?`<div class="summary">${esc(x.s)}</div>`:''}
+    ${stats?`<div class="stats">${stats}</div>`:''}`;
+  return `<div class="card">${inner}</div>`;
+}
+
+let cur=[];
+function render(){
+  cur=filtered();
+  $('count').textContent=`筛选结果 ${cur.length} 条`;
+  const slice=cur.slice(0,state.page*PAGE);
+  $('list').innerHTML=slice.map(card).join('');
+  $('more').style.display=slice.length<cur.length?'block':'none';
+  $('empty').style.display=cur.length?'none':'block';
+}
+$('more').addEventListener('click',()=>{state.page++;render()});
+$('q').addEventListener('input',e=>{state.q=e.target.value.trim();state.page=1;render()});
+$('sort').addEventListener('change',e=>{state.sort=e.target.value;state.page=1;render()});
+
+renderChips();render();
+</script>
+</body>
+</html>
