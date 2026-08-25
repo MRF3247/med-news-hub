@@ -114,6 +114,9 @@ pre{white-space:pre-wrap;font:inherit}
 .float .ftitle{flex:1;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .ai-btn{border:1px solid var(--acc);background:transparent;color:var(--acc);border-radius:2px;font-size:11px;padding:1px 9px;cursor:pointer;vertical-align:2px;letter-spacing:1px;transition:all .15s}
 .ai-btn:hover{background:var(--acc);color:#fff}
+.mbox .report-sec{font-family:"Songti SC","STSong","Noto Serif SC","SimSun",serif;font-size:14px;letter-spacing:2px;color:var(--acc);margin:18px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--line)}
+.mbox .report-p{margin:6px 0;line-height:1.8;color:var(--tx)}
+.mbox .report-cmt{margin:4px 0 4px 14px;padding:4px 10px;border-left:2px solid var(--line);background:var(--paper);font-size:12.5px;color:#57534a}
 
 footer{text-align:center;padding:32px 0 8px;margin-top:8px;border-top:1px solid var(--line)}
 footer .f-title{font-size:15px;letter-spacing:4px;margin-bottom:4px}
@@ -170,7 +173,8 @@ function itemHTML(it,i,rank){
   const stats=Object.entries(it.n).map(([k,v])=>`${k} ${fmt(v)}`).join(' · ');
   const src=it.h?`<a href="${esc(it.h)}" target="_blank" rel="noopener">${esc(it.a)}</a>`:`<span>${esc(it.a)}</span>`;
   const badge=it.g.length?`<a class="badge" href="#/platform/${encodeURIComponent(it.p)}${qs({cat:it.g[0]})}">${esc(it.g[0])}</a>`:'';
-  const ai=(it.r||it.s)?`<button class="ai-btn" data-ai="${i}">AI 摘要</button>`:'';
+  // AI 摘要功能目前只保留 B站（2026-08-25 定稿）
+  const ai=(it.r||it.s)&&it.p==='B站'?`<button class="ai-btn" data-ai="${i}">AI 摘要</button>`:'';
   const head=it.u&&it.p!=='视频号'?`<a href="${esc(it.u)}" target="_blank" rel="noopener"><span class="ttl serif">${esc(it.t)}</span></a>`:`<span class="ttl serif">${esc(it.t)}</span>`;
   const en=it.e&&it.e['原文']?`<div class="meta">${esc(it.e['原文'])}</div>`:'';
   const meta=`<div class="meta">${src}${it.d?`<span> · ${it.d}</span>`:''}${stats?`<span> · ${stats}</span>`:''}${badge}${ai}</div>`;
@@ -187,20 +191,22 @@ function renderHome(r){
   const latestK=DATA.reduce((m,x)=>x.k>m?x.k:m,'');
   const date=r.date||(SUMMARY.length?SUMMARY[0].d:latestK);
   const s=SUMMARY.find(x=>x.d===date);
-  const items=[];DATA.forEach((x,i)=>{if(x.k===date)items.push([x,i])});
+  // 当日更新口径（2026-08-25 定稿）：发布时间 ∈ {今天, 昨天}，严格窗口
+  const yday=new Date(Date.now()-864e5).toISOString().slice(0,10);
+  const items=[];DATA.forEach((x,i)=>{if(x.d&&x.d>=yday)items.push([x,i])});
   let h=`<div class="card ai"><h2 class="serif">每日摘要<span class="h2sub">${date}</span></h2>
     <div class="filters first"><span class="meta">日期</span>
     ${SUMMARY.map(x=>`<a class="sbtn ${x.d===date?'on':''}" href="#/${qs({date:x.d})}">${x.d.slice(5)}</a>`).join('')}
     <span class="meta">（今日 ${today}）</span></div>`;
   if(s){
-    h+=`<h2 class="serif" style="border:none;margin:10px 0 4px;padding:0">热点洞察</h2><pre>${rich(s.h)}</pre>
-    <h2 class="serif" style="margin:12px 0 4px;padding:0;border:none">新媒体选题建议</h2><pre>${rich(s.t)}</pre>
+    h+=`<h2 class="serif" style="border:none;margin:10px 0 4px;padding:0">今日内容速览</h2><pre>${rich(s.h)}</pre>
+    ${s.t?`<h2 class="serif" style="margin:12px 0 4px;padding:0;border:none">新媒体选题建议</h2><pre>${rich(s.t)}</pre>`:''}
     <div class="meta">覆盖内容 ${s.n} 条</div>`;
   }else{
     h+=`<div class="empty">—— 该日期暂无摘要 ——</div>`;
   }
-  h+=`</div><div class="card"><h2 class="serif">当日更新<span class="h2sub">${date} · 共 ${items.length} 条</span></h2>`;
-  h+=items.length?items.slice(0,60).map(([x,i],k)=>itemHTML(x,i,k+1)).join(''):'<div class="empty">—— 当日暂无更新 ——</div>';
+  h+=`</div><div class="card"><h2 class="serif">当日更新<span class="h2sub">${yday.slice(5)} ~ ${today.slice(5)} · 共 ${items.length} 条</span></h2>`;
+  h+=items.length?items.slice(0,200).map(([x,i],k)=>itemHTML(x,i,k+1)).join(''):'<div class="empty">—— 该窗口内暂无内容 ——</div>';
   return h+'</div>';
 }
 
@@ -229,7 +235,7 @@ function renderPlatform(r){
   const link=(over)=>`#/platform/${encodeURIComponent(name)}${qs({sort:r.sort,cat:r.cat,month:r.month,range:r.range,...over})}`;
   let h=`<div class="float"><div class="fhead"><h3 class="serif">热榜 · TOP20</h3>
     <div class="ft">${['7d','30d','all'].map(g=>`<a class="${g===r.range?'on':''}" href="${link({range:g,page:''})}">${g}</a>`).join('')}</div></div>
-    ${top.slice(0,20).map(([x,i],k)=>`<div class="fitem"><span class="frk">${k+1}</span>${x.u&&name!=='视频号'?`<a class="ftitle" href="${esc(x.u)}" target="_blank" rel="noopener">${esc(x.t)}</a>`:`<span class="ftitle">${esc(x.t)}</span>`}${(x.r||x.s)?`<button class="ai-btn" style="font-size:10px;padding:0 6px" data-ai="${i}">AI</button>`:''}</div>`).join('')}
+    ${top.slice(0,20).map(([x,i],k)=>`<div class="fitem"><span class="frk">${k+1}</span>${x.u&&name!=='视频号'?`<a class="ftitle" href="${esc(x.u)}" target="_blank" rel="noopener">${esc(x.t)}</a>`:`<span class="ftitle">${esc(x.t)}</span>`}${(x.r||x.s)&&x.p==='B站'?`<button class="ai-btn" style="font-size:10px;padding:0 6px" data-ai="${i}">AI</button>`:''}</div>`).join('')}
   </div>`;
   h+=`<div class="main">
     <div class="filters first"><span class="meta">分类</span>
@@ -299,16 +305,29 @@ document.addEventListener('submit',e=>{
   const f=e.target.closest('.pjump');
   if(f){e.preventDefault();const p=parseInt(f.page.value);if(p>=1)f.action,go(f.dataset.jump.replace(/&$/,'')+`&page=${p}`);}
 });
+// AI 分析报告排版：【段标题】→ serif 红色小标，其余 → 段落；评论引用 → 缩进引用样式
+function formatAI(text){
+  if(!text)return '';
+  const lines=text.split('\n');let h='';
+  for(const l0 of lines){
+    const l=l0.trim();if(!l)continue;
+    const m=l.match(/^【(.+?)】\s*(.*)$/);
+    if(m){h+=`<div class="report-sec">${esc(m[1])}</div>`;if(m[2])h+=`<p class="report-p">${esc(m[2])}</p>`;}
+    else if(l.indexOf('“')===0||/^[“"].*[”"]$/.test(l)){h+=`<div class="report-cmt">${esc(l)}</div>`;}
+    else{h+=`<p class="report-p">${esc(l)}</p>`;}
+  }
+  return h;
+}
 function openModal(i){
   const d=DATA[i];if(!d)return;
   let h='<div class="mbox"><button class="mclose" id="mclose">×</button>';
   if(d.p==='小红书'){
-    h+=(d.c?`<img class="mcover" src="${d.c}" onerror="this.remove()">`:'')
+    h+=(d.c?`<img class="mcover" src="${d.c}" onerror="this.remove()">`:``)
       +`<h2 class="serif">${esc(d.t)}</h2><div class="mbody">${esc(d.s||'（无正文）')}</div>`
       +`<div class="mmeta">${esc(d.a)} · ${d.d}${Object.entries(d.n).map(([k,v])=>' · '+k+' '+fmt(v)).join('')}</div>`;
   }else{
     h+=`<h2 class="serif">${esc(d.t)}</h2><div class="mmeta">${d.p} · ${esc(d.a)} · ${d.d}${Object.entries(d.n).map(([k,v])=>' · '+k+' '+fmt(v)).join('')}</div>`
-      +`<div class="mbody">${esc(d.s||'')}${d.r?'\n\n—— AI 分析报告 ——\n'+esc(d.r):''}</div>`;
+      +`<div class="mbody">${esc(d.s||'')}${d.r?'<div style="margin-top:8px">'+formatAI(d.r)+'</div>':''}</div>`;
   }
   if(d.u)h+=`<a class="mbtn" href="${esc(d.u)}" target="_blank" rel="noopener">阅读原文</a>`;
   h+='</div>';
