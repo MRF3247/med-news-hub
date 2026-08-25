@@ -1,205 +1,336 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>每日医讯</title>
 <style>
-:root{
-  --paper:#faf8f5; --card:#ffffff; --ink:#1b1b1f; --sub:#7a756c; --faint:#a8a29a;
-  --line:#e8e3db; --accent:#9e2b25; --accent-soft:#f6eeec;
-}
+:root{--paper:#faf8f5;--card:#fffdf9;--line:#e8e3db;--tx:#1b1b1f;--sub:#7a756c;--faint:#a8a29a;--acc:#9e2b25;--acc-soft:#f6eeec}
 *{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-font-smoothing:antialiased}
-body{font-family:"PingFang SC","Helvetica Neue","Microsoft YaHei",sans-serif;background:var(--paper);color:var(--ink);line-height:1.7}
+body{background:var(--paper);color:var(--tx);font:14px/1.75 "PingFang SC","Helvetica Neue","Microsoft YaHei",sans-serif}
 .serif{font-family:"Songti SC","STSong","Noto Serif SC","SimSun",serif}
-.wrap{max-width:880px;margin:0 auto;padding:0 20px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px 40px}
 
-/* ── 刊头 ── */
-.masthead{text-align:center;padding:52px 0 0}
-.masthead .kicker{font-size:12px;letter-spacing:6px;color:var(--sub);text-transform:uppercase}
-.masthead h1{font-size:52px;font-weight:700;letter-spacing:10px;margin:10px 0 6px;text-indent:10px}
-.masthead .sub{font-size:13px;color:var(--sub);letter-spacing:1px}
-.rule{border:0;border-top:1px solid var(--ink);margin:26px 0 0}
-.rule.double{border-top:3px double var(--ink);margin-top:3px;height:4px}
+/* ── 页头（紧凑单行，冻结） ── */
+.sitehead{display:flex;align-items:center;gap:24px;padding:12px 0;border-bottom:1px solid var(--line);flex-wrap:wrap;position:sticky;top:0;background:var(--paper);z-index:50}
+.brand{font-size:20px;font-weight:700;letter-spacing:4px;flex-shrink:0;color:var(--tx);text-decoration:none}
+nav{display:flex;gap:4px 22px;flex-wrap:wrap}
+nav a{font-size:13.5px;color:var(--sub);text-decoration:none;letter-spacing:1px;padding:4px 1px;position:relative}
+nav a:hover{color:var(--tx)}
+nav a.on{color:var(--tx);font-weight:600}
+nav a.on::after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:2px;background:var(--acc)}
+.search{flex:1;min-width:160px;max-width:260px;margin-left:auto}
+.search input{width:100%;padding:7px 12px;border:1px solid var(--line);border-radius:2px;font-size:13px;background:var(--card);color:var(--tx);outline:none;transition:border-color .2s}
+.search input:focus{border-color:var(--tx)}
+.search input::placeholder{color:var(--faint)}
 
-/* ── 栏目导航 ── */
-nav.channels{display:flex;justify-content:center;flex-wrap:wrap;gap:2px 28px;padding:18px 0 16px;border-bottom:1px solid var(--line)}
-.channel{font-size:15px;color:var(--sub);cursor:pointer;padding:4px 2px;position:relative;letter-spacing:1px;background:none;border:0;font-family:inherit}
-.channel .c{font-size:11px;color:var(--faint);margin-left:3px;vertical-align:super}
-.channel:hover{color:var(--ink)}
-.channel.active{color:var(--ink);font-weight:600}
-.channel.active::after{content:"";position:absolute;left:0;right:0;bottom:-17px;height:2px;background:var(--accent)}
+/* ── 回到顶部 ── */
+#backtop{position:fixed;right:20px;bottom:28px;width:44px;height:44px;border-radius:50%;border:1px solid var(--tx);background:var(--card);color:var(--tx);font-size:18px;cursor:pointer;display:none;z-index:80;transition:all .2s;line-height:1}
+#backtop:hover{background:var(--tx);color:var(--paper)}
 
-/* ── 工具栏 ── */
-.toolbar{position:sticky;top:0;background:var(--paper);z-index:10;padding:16px 0 12px;border-bottom:1px solid var(--line)}
-.search-row{display:flex;gap:10px}
-#q{flex:1;padding:10px 16px;border:1px solid var(--line);border-radius:2px;font-size:14px;background:var(--card);outline:none;color:var(--ink);transition:border-color .2s}
-#q:focus{border-color:var(--ink)}
-#q::placeholder{color:var(--faint)}
-select{padding:10px 12px;border:1px solid var(--line);border-radius:2px;font-size:13px;background:var(--card);color:var(--ink);cursor:pointer}
-.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-.chip{padding:3px 12px;border-radius:2px;font-size:12px;background:transparent;border:1px solid var(--line);color:var(--sub);cursor:pointer;letter-spacing:.5px;transition:all .15s}
-.chip:hover{border-color:var(--sub);color:var(--ink)}
-.chip.active{background:var(--ink);border-color:var(--ink);color:var(--paper)}
-#count{font-size:12px;color:var(--faint);margin-top:10px;letter-spacing:1px}
+/* ── 卡片与列表 ── */
+.card{background:var(--card);border:1px solid var(--line);border-radius:3px;padding:20px 24px;margin:16px 0}
+.card h2{font-size:17px;letter-spacing:2px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.card h2 .h2sub{font-size:12px;color:var(--faint);letter-spacing:1px;font-weight:400;margin-left:10px}
+.ai{border-left:3px solid var(--acc)}
+.ai pre{font-size:13.5px;color:#3d382f}
+.main{margin-right:304px}
+.item{display:flex;gap:16px;padding:14px 0;border-bottom:1px solid var(--line);align-items:flex-start}
+.item:last-child{border-bottom:none}
+.idx{font-size:13px;color:var(--faint);min-width:26px;padding-top:4px;font-variant-numeric:tabular-nums;text-align:right}
+.meta{color:var(--sub);font-size:12px;margin-top:5px;letter-spacing:.3px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.meta a{color:var(--sub);text-decoration:none}
+.meta a:hover{color:var(--acc)}
+.ttl{font-size:16.5px;font-weight:600;line-height:1.55}
+a{color:var(--tx);text-decoration:none}
+a:hover{color:var(--acc)}
+.thumb31{width:124px;aspect-ratio:3/4;object-fit:cover;border-radius:3px;flex-shrink:0;background:var(--paper);border:1px solid var(--line)}
+.badge{display:inline-block;padding:0 8px;font-size:11px;letter-spacing:1px;border:1px solid var(--acc);color:var(--acc);border-radius:2px;text-decoration:none}
+.badge:hover{background:var(--acc-soft)}
+.body-text{color:#57534a;margin-top:5px;font-size:13.5px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.zoom{cursor:zoom-in}
+.lightbox{position:fixed;inset:0;background:rgba(20,18,15,.9);display:none;align-items:center;justify-content:center;z-index:100;cursor:zoom-out}
+.lightbox img{max-width:92vw;max-height:92vh;border-radius:3px}
+.lightbox.on{display:flex}
+.modal{position:fixed;inset:0;background:rgba(20,18,15,.55);display:none;align-items:center;justify-content:center;z-index:90}
+.modal.on{display:flex}
+.mbox{background:var(--card);border-radius:3px;max-width:640px;width:92%;max-height:86vh;overflow-y:auto;padding:24px 28px;position:relative;border-top:3px solid var(--tx)}
+.mbox .mclose{position:sticky;top:0;float:right;cursor:pointer;font-size:16px;color:var(--sub);background:none;border:none}
+.mbox .mclose:hover{color:var(--acc)}
+.mbox h2{font-size:18px;margin:4px 0 8px;padding-right:24px;line-height:1.5}
+.mbox .mmeta{color:var(--sub);font-size:12px;margin-bottom:10px;letter-spacing:.5px}
+.mbox .mbody{font-size:13.5px;line-height:1.8;color:var(--tx);white-space:pre-wrap}
+.mbox .mbtn{display:inline-block;margin-top:16px;padding:8px 22px;border:1px solid var(--tx);color:var(--tx);border-radius:2px;font-size:12px;letter-spacing:2px;text-decoration:none;transition:all .2s}
+.mbox .mbtn:hover{background:var(--tx);color:var(--paper)}
+.mbox .mcover{width:100%;max-height:420px;object-fit:cover;border-radius:3px;margin-bottom:12px}
+.empty{color:var(--faint);padding:32px;text-align:center;letter-spacing:2px;font-size:13px}
+pre{white-space:pre-wrap;font:inherit}
 
-/* ── 列表 ── */
-.list{padding:8px 0 48px}
-.item{padding:22px 4px;border-bottom:1px solid var(--line);display:flex;gap:18px;transition:background .15s}
-.item:hover{background:var(--card)}
-.item .idx{font-size:13px;color:var(--faint);min-width:30px;padding-top:5px;font-variant-numeric:tabular-nums}
-.item .body{flex:1;min-width:0}
-.item a.t{color:var(--ink);text-decoration:none;font-size:18px;font-weight:600;line-height:1.5;display:block}
-.item a.t:hover{color:var(--accent)}
-.meta{display:flex;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--sub);margin-top:7px;align-items:center}
-.meta a.author{color:var(--sub);text-decoration:none}
-.meta a.author:hover{color:var(--accent)}
-.badge{padding:1px 8px;font-size:11px;letter-spacing:1px;border:1px solid var(--accent);color:var(--accent);border-radius:2px}
-.tag{font-size:12px;color:var(--faint)}
-.tag::before{content:"· ";color:var(--line)}
-.summary{font-size:14px;color:#57534a;margin-top:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.cover{width:104px;height:138px;object-fit:cover;border-radius:3px;border:1px solid var(--line);flex-shrink:0;background:var(--paper)}
-.stats{font-size:12px;color:var(--faint);margin-top:7px;letter-spacing:.5px}
-.stats span{margin-right:14px}
-.stats b{font-weight:600;color:var(--sub)}
+/* ── 筛选条 ── */
+.filters{display:flex;gap:6px;margin:10px 0 0;flex-wrap:wrap;align-items:center}
+.filters.first{margin-top:16px}
+.filters .meta{margin-right:2px;margin-top:0}
+.filters a.sbtn{padding:3px 12px;border:1px solid var(--line);border-radius:2px;font-size:12px;background:var(--card);color:var(--sub);letter-spacing:.5px;text-decoration:none;transition:all .15s}
+.filters a.sbtn:hover{border-color:var(--sub);color:var(--tx)}
+.filters a.sbtn.on{background:var(--tx);color:var(--paper);border-color:var(--tx)}
 
-#more{display:block;margin:32px auto 0;padding:11px 44px;border:1px solid var(--ink);color:var(--ink);background:transparent;border-radius:2px;font-size:13px;letter-spacing:3px;cursor:pointer;transition:all .2s}
-#more:hover{background:var(--ink);color:var(--paper)}
-.empty{text-align:center;color:var(--faint);padding:80px 0;font-size:14px;letter-spacing:2px}
+/* ── 列表工具行 / 排序切换 ── */
+.listbar{display:flex;justify-content:space-between;align-items:center;margin:14px 0 6px}
+.togglebtn{padding:5px 16px;border:1px solid var(--tx);border-radius:2px;font-size:12.5px;letter-spacing:1px;color:var(--tx);background:var(--card);text-decoration:none;transition:all .2s}
+.togglebtn:hover{background:var(--tx);color:var(--paper)}
 
-footer{text-align:center;padding:36px 0 44px;border-top:3px double var(--ink);margin-top:20px}
-footer .f-title{font-size:16px;letter-spacing:4px;margin-bottom:6px}
-footer p{font-size:12px;color:var(--faint);letter-spacing:1px}
+/* ── 月份标签行（横向滚动） ── */
+.chiprow{display:flex;gap:6px;overflow-x:auto;white-space:nowrap;padding-bottom:4px;scrollbar-width:thin;flex:1;min-width:0}
+.chiprow a{flex-shrink:0}
 
-@media(max-width:640px){
-  .masthead{padding:36px 0 0}
-  .masthead h1{font-size:36px;letter-spacing:6px;text-indent:6px}
-  nav.channels{gap:2px 18px}
-  .item a.t{font-size:16px}
-  .item .idx{display:none}
-  .cover{width:80px;height:106px}
-}
+/* ── 分页 ── */
+.pager{display:flex;gap:8px;align-items:center;justify-content:center;margin:20px 0 6px;flex-wrap:wrap}
+.pager a.pbtn{padding:5px 14px;border:1px solid var(--line);border-radius:2px;font-size:12.5px;color:var(--sub);background:var(--card);letter-spacing:1px;text-decoration:none;transition:all .15s}
+.pager a.pbtn:hover{border-color:var(--sub);color:var(--tx)}
+.pager a.pbtn.dis{opacity:.35;pointer-events:none}
+.pager .pcur{font-size:12.5px;color:var(--sub);letter-spacing:1px;font-variant-numeric:tabular-nums}
+.pager .pjump{display:flex;gap:6px;align-items:center;margin-left:6px}
+.pager .pjump input{width:54px;padding:5px 8px;border:1px solid var(--line);border-radius:2px;font-size:12.5px;background:var(--card);color:var(--tx);text-align:center;outline:none}
+.pager .pjump input:focus{border-color:var(--tx)}
+.pager .pjump button{padding:5px 12px;border:1px solid var(--tx);border-radius:2px;font-size:12.5px;background:var(--card);color:var(--tx);letter-spacing:1px;cursor:pointer}
+.pager .pjump button:hover{background:var(--tx);color:var(--paper)}
+
+/* ── 洞察里的原文链接 ── */
+.ref-link{color:var(--acc);font-size:12px;letter-spacing:1px;text-decoration:none;border-bottom:1px solid var(--acc);margin:0 3px;white-space:nowrap}
+.ref-link:hover{background:var(--acc-soft)}
+
+/* ── 热榜侧栏 ── */
+.float{position:fixed;right:20px;top:60px;width:276px;max-height:84vh;overflow-y:auto;overscroll-behavior:contain;background:var(--card);border:1px solid var(--line);border-top:3px solid var(--tx);border-radius:3px;padding:0 18px 16px;z-index:10}
+.float .fhead{position:sticky;top:0;background:var(--card);padding-top:16px;z-index:2}
+.float h3{font-size:14px;letter-spacing:3px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.float .ft{display:flex;gap:6px;margin-bottom:4px;padding-bottom:6px}
+.float .ft a{padding:2px 10px;border-radius:2px;font-size:11px;border:1px solid var(--line);color:var(--sub);letter-spacing:1px;text-decoration:none}
+.float .ft a.on{background:var(--tx);color:var(--paper);border-color:var(--tx)}
+.float .fitem{display:flex;gap:10px;padding:7px 0;border-bottom:1px dashed var(--line);font-size:12.5px;align-items:flex-start;line-height:1.5}
+.float .fitem:last-child{border-bottom:none}
+.float .frk{color:var(--faint);min-width:18px;text-align:right;font-variant-numeric:tabular-nums;font-size:11.5px;padding-top:2px}
+.float .fitem:nth-child(-n+4) .frk{color:var(--acc);font-weight:700}
+.float .ftitle{flex:1;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ai-btn{border:1px solid var(--acc);background:transparent;color:var(--acc);border-radius:2px;font-size:11px;padding:1px 9px;cursor:pointer;vertical-align:2px;letter-spacing:1px;transition:all .15s}
+.ai-btn:hover{background:var(--acc);color:#fff}
+
+footer{text-align:center;padding:32px 0 8px;margin-top:8px;border-top:1px solid var(--line)}
+footer .f-title{font-size:15px;letter-spacing:4px;margin-bottom:4px}
+footer p{font-size:11px;color:var(--faint);letter-spacing:1px}
+
+@media(max-width:900px){.main{margin-right:0}.float{position:static;width:100%;max-height:none;margin:14px 0}
+.brand{font-size:17px}.search{margin-left:0;max-width:none}}
 </style>
 </head>
 <body>
-<header class="masthead wrap">
-  <div class="kicker">Daily Medical Briefing</div>
-  <h1 class="serif">每日医讯</h1>
-  <p class="sub" id="subtitle"></p>
-</header>
 <div class="wrap">
-  <hr class="rule"><hr class="rule double">
-  <nav class="channels" id="tabs"></nav>
-  <div class="toolbar">
-    <div class="search-row">
-      <input id="q" type="search" placeholder="搜索标题、摘要、作者…">
-      <select id="sort">
-        <option value="date">按最新</option>
-        <option value="hot">按热度</option>
-      </select>
-    </div>
-    <div class="chips" id="chips"></div>
-    <div id="count"></div>
-  </div>
-  <div class="list" id="list"></div>
-  <button id="more" style="display:none">加载更多</button>
-  <div class="empty" id="empty" style="display:none">—— 没有匹配的内容 ——</div>
+  <header class="sitehead">
+    <a class="brand serif" href="#/">每日医讯</a>
+    <nav id="nav"></nav>
+    <div class="search"><form id="sform"><input name="q" id="sq" placeholder="搜索标题 / 来源 / 摘要…"></form></div>
+  </header>
+  <div id="body"></div>
+  <footer><div class="f-title serif">每日医讯</div><p>DAILY MEDICAL BRIEFING · 数据每日更新</p></footer>
 </div>
-<footer>
-  <div class="f-title serif">每日医讯</div>
-  <p>数据源自医学资讯素材库 · 静态站点 · 每日更新</p>
-</footer>
+<button id="backtop" title="回到顶部">↑</button>
+<div class="lightbox" id="lightbox"><img src="" alt="大图"></div>
+<div class="modal" id="modal"><div id="mbody"></div></div>
 <script src="data.js"></script>
 <script>
-// 栏目顺序与显示名映射（数据中的平台名 → 显示名）
-const PLATFORMS=[
-  ['全部','全部'],
-  ['行业网站','专业网站'],
-  ['公众号','公众号'],
-  ['B站','B站'],
-  ['小红书','小红书'],
-  ['抖音','抖音'],
-  ['YouTube','YouTube'],
-  ['视频号','视频号'],
-];
-const HOT={行业网站:[],公众号:['阅读','点赞','在看'],B站:['播放'],小红书:['点赞','收藏','评论'],抖音:['点赞','评论','分享'],视频号:['点赞','评论','转发'],YouTube:[]};
-const NAME_OF=Object.fromEntries(PLATFORMS);
-let state={p:'全部',q:'',tag:'',sort:'date',page:1};
-const PAGE=60;
-const $=id=>document.getElementById(id);
-const esc=s=>s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const fmtNum=n=>n>=10000?(n/10000).toFixed(1).replace(/\.0$/,'')+'万':n;
+const PLATFORMS=["B站","小红书","抖音","视频号","公众号","YouTube","行业网站"];
+const CATS=["前沿研究","医学新闻","实用干货","健康科普","深度解读","行业舆情","日常其他"];
+const PER=50;
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=n=>n>=10000?(n/10000).toFixed(1).replace(/\.0$/,'')+'万':n;
+const today=new Date().toISOString().slice(0,10);
 
-const dates=DATA.map(x=>x.d).filter(Boolean).sort();
-$('subtitle').textContent=`共收录 ${DATA.length} 条素材 · ${dates[0]||''} 至 ${dates[dates.length-1]||''}`;
-
-const counts={};DATA.forEach(x=>counts[x.p]=(counts[x.p]||0)+1);
-$('tabs').innerHTML=PLATFORMS.map(([key,name])=>{
-  const c=key==='全部'?DATA.length:(counts[key]||0);
-  return `<button class="channel" data-p="${key}">${name}<span class="c">${c}</span></button>`;
-}).join('');
-$('tabs').addEventListener('click',e=>{
-  const b=e.target.closest('.channel');if(!b)return;
-  state.p=b.dataset.p;state.tag='';state.page=1;
-  document.querySelectorAll('.channel').forEach(t=>t.classList.toggle('active',t===b));
-  renderChips();render();
-});
-document.querySelector('.channel').classList.add('active');
-
-function renderChips(){
-  const pool=state.p==='全部'?DATA:DATA.filter(x=>x.p===state.p);
-  const tc={};pool.forEach(x=>x.g.forEach(g=>tc[g]=(tc[g]||0)+1));
-  const tags=Object.entries(tc).sort((a,b)=>b[1]-a[1]).slice(0,16);
-  $('chips').innerHTML=tags.length?tags.map(([g,c])=>`<button class="chip${g===state.tag?' active':''}" data-g="${esc(g)}">${esc(g)} ${c}</button>`).join(''):'';
+// ── 路由：#/  #/platform/B站?sort=&cat=&month=&page=&range=  #/search?q=
+function route(){
+  const h=location.hash.slice(1)||'/';
+  const [path,qs]=h.split('?');
+  const p=new URLSearchParams(qs||'');
+  const seg=path.split('/').filter(Boolean);
+  if(seg[0]==='platform'&&PLATFORMS.includes(decodeURIComponent(seg[1]||''))) return {v:'platform',name:decodeURIComponent(seg[1]),sort:p.get('sort')||'time',cat:p.get('cat')||'',month:p.get('month')||'',page:Math.max(1,parseInt(p.get('page'))||1),range:p.get('range')||'7d'};
+  if(seg[0]==='search') return {v:'search',q:p.get('q')||''};
+  return {v:'home',date:p.get('date')||''};
 }
-$('chips').addEventListener('click',e=>{
-  const b=e.target.closest('.chip');if(!b)return;
-  state.tag=state.tag===b.dataset.g?'':b.dataset.g;state.page=1;
-  document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('active',c.dataset.g===state.tag));
-  render();
-});
+const go=h=>{location.hash=h;};
+const qs=o=>{const s=new URLSearchParams(Object.entries(o).filter(([,v])=>v!==''&&v!=null)).toString();return s?'?'+s:'';};
 
-function filtered(){
-  const q=state.q.toLowerCase();
-  let r=DATA.filter(x=>
-    (state.p==='全部'||x.p===state.p)&&
-    (!state.tag||x.g.includes(state.tag))&&
-    (!q||x.t.toLowerCase().includes(q)||x.s.toLowerCase().includes(q)||x.a.toLowerCase().includes(q))
-  );
-  if(state.sort==='hot'){
-    const hot=p=>{const k=HOT[p]||[];return k.length?k[0]:null};
-    r=[...r].sort((a,b)=>{const ka=hot(a.p),kb=hot(b.p);return ((kb?b.n[kb]:0)||0)-((ka?a.n[ka]:0)||0)});
+// ── 洞察链接：🔗+裸URL → 「原文 ›」
+function rich(t){
+  if(!t)return '';
+  return esc(t).replace(/🔗?\s*(https?:\/\/[^\s🔗]+)/g,'<a class="ref-link" href="$1" target="_blank" rel="noopener">原文 ›</a>');
+}
+
+// ── 条目渲染 ──
+function itemHTML(it,i,rank){
+  const rk=rank?`<div class="idx serif">${String(rank).padStart(2,'0')}</div>`:'';
+  const stats=Object.entries(it.n).map(([k,v])=>`${k} ${fmt(v)}`).join(' · ');
+  const src=it.h?`<a href="${esc(it.h)}" target="_blank" rel="noopener">${esc(it.a)}</a>`:`<span>${esc(it.a)}</span>`;
+  const badge=it.g.length?`<a class="badge" href="#/platform/${encodeURIComponent(it.p)}${qs({cat:it.g[0]})}">${esc(it.g[0])}</a>`:'';
+  const ai=(it.r||it.s)?`<button class="ai-btn" data-ai="${i}">AI 摘要</button>`:'';
+  const head=it.u&&it.p!=='视频号'?`<a href="${esc(it.u)}" target="_blank" rel="noopener"><span class="ttl serif">${esc(it.t)}</span></a>`:`<span class="ttl serif">${esc(it.t)}</span>`;
+  const en=it.e&&it.e['原文']?`<div class="meta">${esc(it.e['原文'])}</div>`:'';
+  const meta=`<div class="meta">${src}${it.d?`<span> · ${it.d}</span>`:''}${stats?`<span> · ${stats}</span>`:''}${badge}${ai}</div>`;
+  if(it.p==='小红书'){
+    const thumb=it.c?`<img class="thumb31 zoom" src="${it.c}" data-zoom loading="lazy" onerror="this.remove()">`:'';
+    const body=`<div class="body-text">${esc(it.s||'（无正文）')}</div>`;
+    return `<div class="item">${rk}${thumb}<div style="flex:1;min-width:0">${head}${meta}${body}</div></div>`;
   }
-  return r;
+  return `<div class="item">${rk}<div style="flex:1;min-width:0">${head}${en}${meta}</div></div>`;
 }
 
-function item(x,i){
-  const stats=Object.entries(x.n).filter(([,v])=>v>0).map(([k,v])=>`<span>${k} <b>${fmtNum(v)}</b></span>`).join('');
-  const tags=x.g.map(g=>`<span class="tag">${esc(g)}</span>`).join('');
-  const ext=Object.entries(x.e||{}).filter(([,v])=>v).map(([k,v])=>`<span class="tag">${esc(v)}</span>`).join('');
-  return `<div class="item"><div class="idx serif">${String(i+1).padStart(2,'0')}</div><div class="body">
-    <a class="t serif" ${x.u?`href="${esc(x.u)}" target="_blank" rel="noopener"`:''}>${esc(x.t)}</a>
-    <div class="meta"><span class="badge">${NAME_OF[x.p]||x.p}</span>${x.a?(x.h?`<a class="author" href="${esc(x.h)}" target="_blank" rel="noopener">${esc(x.a)}</a>`:`<span>${esc(x.a)}</span>`):''}${x.d?`<span>${x.d}</span>`:''}${tags}${ext}</div>
-    ${x.s?`<div class="summary">${esc(x.s)}</div>`:''}
-    ${stats?`<div class="stats">${stats}</div>`:''}
-  </div>${x.c?`<img class="cover" src="${x.c}" loading="lazy" alt="">`:''}</div>`;
+// ── 首页 ──
+function renderHome(r){
+  const latestK=DATA.reduce((m,x)=>x.k>m?x.k:m,'');
+  const date=r.date||(SUMMARY.length?SUMMARY[0].d:latestK);
+  const s=SUMMARY.find(x=>x.d===date);
+  const items=[];DATA.forEach((x,i)=>{if(x.k===date)items.push([x,i])});
+  let h=`<div class="card ai"><h2 class="serif">每日摘要<span class="h2sub">${date}</span></h2>
+    <div class="filters first"><span class="meta">日期</span>
+    ${SUMMARY.map(x=>`<a class="sbtn ${x.d===date?'on':''}" href="#/${qs({date:x.d})}">${x.d.slice(5)}</a>`).join('')}
+    <span class="meta">（今日 ${today}）</span></div>`;
+  if(s){
+    h+=`<h2 class="serif" style="border:none;margin:10px 0 4px;padding:0">热点洞察</h2><pre>${rich(s.h)}</pre>
+    <h2 class="serif" style="margin:12px 0 4px;padding:0;border:none">新媒体选题建议</h2><pre>${rich(s.t)}</pre>
+    <div class="meta">覆盖内容 ${s.n} 条</div>`;
+  }else{
+    h+=`<div class="empty">—— 该日期暂无摘要 ——</div>`;
+  }
+  h+=`</div><div class="card"><h2 class="serif">当日更新<span class="h2sub">${date} · 共 ${items.length} 条</span></h2>`;
+  h+=items.length?items.slice(0,60).map(([x,i],k)=>itemHTML(x,i,k+1)).join(''):'<div class="empty">—— 当日暂无更新 ——</div>';
+  return h+'</div>';
 }
 
-let cur=[];
+// ── 平台页 ──
+function hotOf(x){const v=Object.values(x.n);return v.length?v[0]:0;}
+function renderPlatform(r){
+  const name=r.name;
+  const pool=[];DATA.forEach((x,i)=>{
+    if(x.p!==name)return;
+    if(r.cat&&!x.g.includes(r.cat))return;
+    if(r.month&&x.d.slice(0,7)!==r.month)return;
+    pool.push([x,i]);
+  });
+  if(r.sort==='views')pool.sort((a,b)=>hotOf(b[0])-hotOf(a[0])); // 时间序已由导出保证
+  const total=pool.length, pages=Math.max(1,Math.ceil(total/PER));
+  const page=Math.min(r.page,pages);
+  const slice=pool.slice((page-1)*PER,page*PER);
+  const months=[...new Set(DATA.filter(x=>x.p===name&&x.d).map(x=>x.d.slice(0,7)))].sort().reverse();
+
+  // 热榜 TOP20
+  const days={'7d':7,'30d':30,'all':null}[r.range];
+  const since=days?new Date(Date.now()-days*864e5).toISOString().slice(0,10):null;
+  const top=[];DATA.forEach((x,i)=>{if(x.p===name&&(!since||x.d>=since))top.push([x,i])});
+  top.sort((a,b)=>hotOf(b[0])-hotOf(a[0]));
+
+  const link=(over)=>`#/platform/${encodeURIComponent(name)}${qs({sort:r.sort,cat:r.cat,month:r.month,range:r.range,...over})}`;
+  let h=`<div class="float"><div class="fhead"><h3 class="serif">热榜 · TOP20</h3>
+    <div class="ft">${['7d','30d','all'].map(g=>`<a class="${g===r.range?'on':''}" href="${link({range:g,page:''})}">${g}</a>`).join('')}</div></div>
+    ${top.slice(0,20).map(([x,i],k)=>`<div class="fitem"><span class="frk">${k+1}</span>${x.u&&name!=='视频号'?`<a class="ftitle" href="${esc(x.u)}" target="_blank" rel="noopener">${esc(x.t)}</a>`:`<span class="ftitle">${esc(x.t)}</span>`}${(x.r||x.s)?`<button class="ai-btn" style="font-size:10px;padding:0 6px" data-ai="${i}">AI</button>`:''}</div>`).join('')}
+  </div>`;
+  h+=`<div class="main">
+    <div class="filters first"><span class="meta">分类</span>
+      <a class="sbtn ${!r.cat?'on':''}" href="${link({cat:'',page:''})}">全部</a>
+      ${CATS.map(c=>`<a class="sbtn ${r.cat===c?'on':''}" href="${link({cat:c,page:''})}">${c}</a>`).join('')}
+    </div>
+    <div class="filters"><span class="meta">月份</span>
+      <div class="chiprow">
+        <a class="sbtn ${!r.month?'on':''}" href="${link({month:'',page:''})}">全部</a>
+        ${months.map(m=>`<a class="sbtn ${r.month===m?'on':''}" href="${link({month:m,page:''})}">${m}</a>`).join('')}
+      </div>
+    </div>
+    <div class="listbar">
+      <span class="meta" style="margin:0">共 ${total} 条 · 第 ${page} / ${pages} 页</span>
+      <a class="togglebtn" href="${link({sort:r.sort==='time'?'views':'time',page:''})}" title="点击切换排序方式">排序：${r.sort==='time'?'按时间':'按热度'} ⇄</a>
+    </div>
+    <div class="card">`;
+  h+=slice.length?slice.map(([x,i],k)=>itemHTML(x,i,(page-1)*PER+k+1)).join(''):'<div class="empty">—— 该筛选条件下暂无数据 ——</div>';
+  h+=`</div><div class="pager">
+    <a class="pbtn ${page<=1?'dis':''}" href="${link({page:1})}">首页</a>
+    <a class="pbtn ${page<=1?'dis':''}" href="${link({page:page-1})}">上一页</a>
+    <span class="pcur">${page} / ${pages}</span>
+    <a class="pbtn ${page>=pages?'dis':''}" href="${link({page:page+1})}">下一页</a>
+    <a class="pbtn ${page>=pages?'dis':''}" href="${link({page:pages})}">末页</a>
+    <form class="pjump" data-jump="${esc(link({page:''}))}">
+      <input type="number" name="page" min="1" max="${pages}" placeholder="页码">
+      <button type="submit">跳转</button>
+    </form>
+  </div></div>`;
+  return h;
+}
+
+// ── 搜索页 ──
+function renderSearch(r){
+  const q=r.q.trim().toLowerCase();
+  if(!q)return '<div class="empty">请输入关键词</div>';
+  const hits=[];DATA.forEach((x,i)=>{if(x.t.toLowerCase().includes(q)||x.s.toLowerCase().includes(q)||x.a.toLowerCase().includes(q)||(x.e['原文']||'').toLowerCase().includes(q))hits.push([x,i])});
+  hits.sort((a,b)=>hotOf(b[0])-hotOf(a[0]));
+  return `<div class="card"><h2 class="serif">搜索<span class="h2sub">「${esc(r.q)}」 · 共 ${hits.length} 条</span></h2>`
+    +(hits.length?hits.slice(0,50).map(([x,i],k)=>itemHTML(x,i,k+1)).join(''):'<div class="empty">—— 没有匹配的内容 ——</div>')+'</div>';
+}
+
+// ── 渲染 ──
 function render(){
-  cur=filtered();
-  $('count').textContent=`共 ${cur.length} 条`;
-  const slice=cur.slice(0,state.page*PAGE);
-  $('list').innerHTML=slice.map(item).join('');
-  $('more').style.display=slice.length<cur.length?'block':'none';
-  $('empty').style.display=cur.length?'none':'block';
+  const r=route();
+  document.querySelectorAll('#nav a').forEach(a=>{
+    a.classList.toggle('on',(r.v==='home'&&a.dataset.p==='')||(r.v==='platform'&&a.dataset.p===r.name));
+  });
+  document.getElementById('sq').value=r.v==='search'?r.q:'';
+  document.getElementById('body').innerHTML=r.v==='platform'?renderPlatform(r):r.v==='search'?renderSearch(r):renderHome(r);
+  if(!location.hash||location.hash==='#/'){}else window.scrollTo(0,0);
 }
-$('more').addEventListener('click',()=>{state.page++;render()});
-$('q').addEventListener('input',e=>{state.q=e.target.value.trim();state.page=1;render()});
-$('sort').addEventListener('change',e=>{state.sort=e.target.value;state.page=1;render()});
+document.getElementById('nav').innerHTML=`<a href="#/" data-p="">今日</a>`+PLATFORMS.map(p=>`<a href="#/platform/${encodeURIComponent(p)}" data-p="${p}">${p}</a>`).join('');
+window.addEventListener('hashchange',render);
 
-renderChips();render();
+// 搜索
+document.getElementById('sform').addEventListener('submit',e=>{e.preventDefault();go('/search'+qs({q:document.getElementById('sq').value.trim()}));});
+
+// 委托：AI 弹窗 / 封面放大 / 跳页
+document.addEventListener('click',e=>{
+  const ai=e.target.closest('[data-ai]');
+  if(ai){openModal(+ai.dataset.ai);return;}
+  const z=e.target.closest('[data-zoom]');
+  if(z){const lb=document.getElementById('lightbox');lb.querySelector('img').src=z.src;lb.classList.add('on');return;}
+});
+document.addEventListener('submit',e=>{
+  const f=e.target.closest('.pjump');
+  if(f){e.preventDefault();const p=parseInt(f.page.value);if(p>=1)f.action,go(f.dataset.jump.replace(/&$/,'')+`&page=${p}`);}
+});
+function openModal(i){
+  const d=DATA[i];if(!d)return;
+  let h='<div class="mbox"><button class="mclose" id="mclose">×</button>';
+  if(d.p==='小红书'){
+    h+=(d.c?`<img class="mcover" src="${d.c}" onerror="this.remove()">`:'')
+      +`<h2 class="serif">${esc(d.t)}</h2><div class="mbody">${esc(d.s||'（无正文）')}</div>`
+      +`<div class="mmeta">${esc(d.a)} · ${d.d}${Object.entries(d.n).map(([k,v])=>' · '+k+' '+fmt(v)).join('')}</div>`;
+  }else{
+    h+=`<h2 class="serif">${esc(d.t)}</h2><div class="mmeta">${d.p} · ${esc(d.a)} · ${d.d}${Object.entries(d.n).map(([k,v])=>' · '+k+' '+fmt(v)).join('')}</div>`
+      +`<div class="mbody">${esc(d.s||'')}${d.r?'\n\n—— AI 分析报告 ——\n'+esc(d.r):''}</div>`;
+  }
+  if(d.u)h+=`<a class="mbtn" href="${esc(d.u)}" target="_blank" rel="noopener">阅读原文</a>`;
+  h+='</div>';
+  document.getElementById('mbody').innerHTML=h;
+  document.getElementById('modal').classList.add('on');
+  document.getElementById('mclose').onclick=()=>document.getElementById('modal').classList.remove('on');
+}
+document.getElementById('modal').addEventListener('click',function(){this.classList.remove('on');});
+document.getElementById('lightbox').addEventListener('click',function(){this.classList.remove('on');});
+
+// 回到顶部
+const bt=document.getElementById('backtop');
+window.addEventListener('scroll',()=>{bt.style.display=window.scrollY>400?'block':'none';});
+bt.onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
+
+// 月份行滚轮横滑
+document.addEventListener('wheel',e=>{
+  const el=e.target.closest('.chiprow');
+  if(el&&Math.abs(e.deltaY)>Math.abs(e.deltaX)){el.scrollLeft+=e.deltaY;e.preventDefault();}
+},{passive:false});
+
+render();
 </script>
 </body>
 </html>
