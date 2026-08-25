@@ -3,53 +3,94 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>医学资讯素材库</title>
+<title>每日医讯</title>
 <style>
-:root{--bg:#f5f7f9;--card:#fff;--ink:#1a2332;--sub:#6b7686;--line:#e6eaf0;--teal:#0e9384;--teal-bg:#e6f6f4}
+:root{
+  --paper:#faf8f5; --card:#ffffff; --ink:#1b1b1f; --sub:#7a756c; --faint:#a8a29a;
+  --line:#e8e3db; --accent:#9e2b25; --accent-soft:#f6eeec;
+}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
-.wrap{max-width:960px;margin:0 auto;padding:0 16px}
-header{background:linear-gradient(135deg,#0e9384,#0b6e63);color:#fff;padding:36px 0 28px}
-header h1{font-size:26px;letter-spacing:1px}
-header p{opacity:.85;font-size:14px;margin-top:6px}
-.tabs{display:flex;gap:8px;flex-wrap:wrap;padding:16px 0 0}
-.tab{padding:6px 14px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-size:14px;cursor:pointer;color:var(--sub);white-space:nowrap}
-.tab.active{background:var(--teal);border-color:var(--teal);color:#fff}
-.tab .c{opacity:.7;font-size:12px;margin-left:4px}
-.toolbar{position:sticky;top:0;background:var(--bg);padding:12px 0;z-index:10;border-bottom:1px solid var(--line)}
-.search-row{display:flex;gap:8px;flex-wrap:wrap}
-#q{flex:1;min-width:200px;padding:9px 14px;border:1px solid var(--line);border-radius:8px;font-size:14px;background:var(--card);outline:none}
-#q:focus{border-color:var(--teal)}
-select{padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:14px;background:var(--card);color:var(--ink)}
-.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-.chip{padding:3px 10px;border-radius:999px;font-size:12px;background:var(--card);border:1px solid var(--line);color:var(--sub);cursor:pointer}
-.chip.active{background:var(--teal-bg);border-color:var(--teal);color:var(--teal)}
-#count{font-size:13px;color:var(--sub);padding:10px 2px 0}
-.list{padding:12px 0 40px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:10px;transition:box-shadow .15s}
-.card:hover{box-shadow:0 2px 10px rgba(20,40,60,.08)}
-.card a.t{color:var(--ink);text-decoration:none;font-size:16px;font-weight:600}
-.card a.t:hover{color:var(--teal)}
-.meta{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--sub);margin-top:6px;align-items:center}
-.badge{padding:1px 8px;border-radius:4px;font-size:12px;background:var(--teal-bg);color:var(--teal)}
-.tag{padding:1px 8px;border-radius:4px;font-size:12px;background:#f0f2f5;color:var(--sub)}
-.summary{font-size:14px;color:#3d4856;margin-top:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.stats{font-size:12px;color:var(--sub);margin-top:6px}
-.stats span{margin-right:12px}
-#more{display:block;margin:20px auto;padding:10px 32px;border:1px solid var(--teal);color:var(--teal);background:var(--card);border-radius:8px;font-size:14px;cursor:pointer}
-#more:hover{background:var(--teal-bg)}
-.empty{text-align:center;color:var(--sub);padding:60px 0}
-footer{text-align:center;font-size:12px;color:var(--sub);padding:20px 0 30px;border-top:1px solid var(--line)}
-@media(max-width:600px){header h1{font-size:20px}.card a.t{font-size:15px}}
+html{-webkit-font-smoothing:antialiased}
+body{font-family:"PingFang SC","Helvetica Neue","Microsoft YaHei",sans-serif;background:var(--paper);color:var(--ink);line-height:1.7}
+.serif{font-family:"Songti SC","STSong","Noto Serif SC","SimSun",serif}
+.wrap{max-width:880px;margin:0 auto;padding:0 20px}
+
+/* ── 刊头 ── */
+.masthead{text-align:center;padding:52px 0 0}
+.masthead .kicker{font-size:12px;letter-spacing:6px;color:var(--sub);text-transform:uppercase}
+.masthead h1{font-size:52px;font-weight:700;letter-spacing:10px;margin:10px 0 6px;text-indent:10px}
+.masthead .sub{font-size:13px;color:var(--sub);letter-spacing:1px}
+.rule{border:0;border-top:1px solid var(--ink);margin:26px 0 0}
+.rule.double{border-top:3px double var(--ink);margin-top:3px;height:4px}
+
+/* ── 栏目导航 ── */
+nav.channels{display:flex;justify-content:center;flex-wrap:wrap;gap:2px 28px;padding:18px 0 16px;border-bottom:1px solid var(--line)}
+.channel{font-size:15px;color:var(--sub);cursor:pointer;padding:4px 2px;position:relative;letter-spacing:1px;background:none;border:0;font-family:inherit}
+.channel .c{font-size:11px;color:var(--faint);margin-left:3px;vertical-align:super}
+.channel:hover{color:var(--ink)}
+.channel.active{color:var(--ink);font-weight:600}
+.channel.active::after{content:"";position:absolute;left:0;right:0;bottom:-17px;height:2px;background:var(--accent)}
+
+/* ── 工具栏 ── */
+.toolbar{position:sticky;top:0;background:var(--paper);z-index:10;padding:16px 0 12px;border-bottom:1px solid var(--line)}
+.search-row{display:flex;gap:10px}
+#q{flex:1;padding:10px 16px;border:1px solid var(--line);border-radius:2px;font-size:14px;background:var(--card);outline:none;color:var(--ink);transition:border-color .2s}
+#q:focus{border-color:var(--ink)}
+#q::placeholder{color:var(--faint)}
+select{padding:10px 12px;border:1px solid var(--line);border-radius:2px;font-size:13px;background:var(--card);color:var(--ink);cursor:pointer}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.chip{padding:3px 12px;border-radius:2px;font-size:12px;background:transparent;border:1px solid var(--line);color:var(--sub);cursor:pointer;letter-spacing:.5px;transition:all .15s}
+.chip:hover{border-color:var(--sub);color:var(--ink)}
+.chip.active{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+#count{font-size:12px;color:var(--faint);margin-top:10px;letter-spacing:1px}
+
+/* ── 列表 ── */
+.list{padding:8px 0 48px}
+.item{padding:22px 4px;border-bottom:1px solid var(--line);display:flex;gap:18px;transition:background .15s}
+.item:hover{background:var(--card)}
+.item .idx{font-size:13px;color:var(--faint);min-width:30px;padding-top:5px;font-variant-numeric:tabular-nums}
+.item .body{flex:1;min-width:0}
+.item a.t{color:var(--ink);text-decoration:none;font-size:18px;font-weight:600;line-height:1.5;display:block}
+.item a.t:hover{color:var(--accent)}
+.meta{display:flex;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--sub);margin-top:7px;align-items:center}
+.meta a.author{color:var(--sub);text-decoration:none}
+.meta a.author:hover{color:var(--accent)}
+.badge{padding:1px 8px;font-size:11px;letter-spacing:1px;border:1px solid var(--accent);color:var(--accent);border-radius:2px}
+.tag{font-size:12px;color:var(--faint)}
+.tag::before{content:"· ";color:var(--line)}
+.summary{font-size:14px;color:#57534a;margin-top:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.cover{width:104px;height:138px;object-fit:cover;border-radius:3px;border:1px solid var(--line);flex-shrink:0;background:var(--paper)}
+.stats{font-size:12px;color:var(--faint);margin-top:7px;letter-spacing:.5px}
+.stats span{margin-right:14px}
+.stats b{font-weight:600;color:var(--sub)}
+
+#more{display:block;margin:32px auto 0;padding:11px 44px;border:1px solid var(--ink);color:var(--ink);background:transparent;border-radius:2px;font-size:13px;letter-spacing:3px;cursor:pointer;transition:all .2s}
+#more:hover{background:var(--ink);color:var(--paper)}
+.empty{text-align:center;color:var(--faint);padding:80px 0;font-size:14px;letter-spacing:2px}
+
+footer{text-align:center;padding:36px 0 44px;border-top:3px double var(--ink);margin-top:20px}
+footer .f-title{font-size:16px;letter-spacing:4px;margin-bottom:6px}
+footer p{font-size:12px;color:var(--faint);letter-spacing:1px}
+
+@media(max-width:640px){
+  .masthead{padding:36px 0 0}
+  .masthead h1{font-size:36px;letter-spacing:6px;text-indent:6px}
+  nav.channels{gap:2px 18px}
+  .item a.t{font-size:16px}
+  .item .idx{display:none}
+  .cover{width:80px;height:106px}
+}
 </style>
 </head>
 <body>
-<header><div class="wrap">
-  <h1>医学资讯素材库</h1>
-  <p id="subtitle"></p>
-</div></header>
+<header class="masthead wrap">
+  <div class="kicker">Daily Medical Briefing</div>
+  <h1 class="serif">每日医讯</h1>
+  <p class="sub" id="subtitle"></p>
+</header>
 <div class="wrap">
-  <nav class="tabs" id="tabs"></nav>
+  <hr class="rule"><hr class="rule double">
+  <nav class="channels" id="tabs"></nav>
   <div class="toolbar">
     <div class="search-row">
       <input id="q" type="search" placeholder="搜索标题、摘要、作者…">
@@ -63,42 +104,53 @@ footer{text-align:center;font-size:12px;color:var(--sub);padding:20px 0 30px;bor
   </div>
   <div class="list" id="list"></div>
   <button id="more" style="display:none">加载更多</button>
-  <div class="empty" id="empty" style="display:none">没有匹配的内容</div>
+  <div class="empty" id="empty" style="display:none">—— 没有匹配的内容 ——</div>
 </div>
-<footer>数据迁移自飞书多维表格 · 静态站点，无 AI 额度限制</footer>
+<footer>
+  <div class="f-title serif">每日医讯</div>
+  <p>数据源自医学资讯素材库 · 静态站点 · 每日更新</p>
+</footer>
 <script src="data.js"></script>
 <script>
-const PLATFORMS=['全部','行业网站','公众号','B站','小红书','抖音','视频号','YouTube'];
+// 栏目顺序与显示名映射（数据中的平台名 → 显示名）
+const PLATFORMS=[
+  ['全部','全部'],
+  ['行业网站','专业网站'],
+  ['公众号','公众号'],
+  ['B站','B站'],
+  ['小红书','小红书'],
+  ['抖音','抖音'],
+  ['YouTube','YouTube'],
+  ['视频号','视频号'],
+];
 const HOT={行业网站:[],公众号:['阅读','点赞','在看'],B站:['播放'],小红书:['点赞','收藏','评论'],抖音:['点赞','评论','分享'],视频号:['点赞','评论','转发'],YouTube:[]};
+const NAME_OF=Object.fromEntries(PLATFORMS);
 let state={p:'全部',q:'',tag:'',sort:'date',page:1};
 const PAGE=60;
 const $=id=>document.getElementById(id);
 const esc=s=>s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmtNum=n=>n>=10000?(n/10000).toFixed(1).replace(/\.0$/,'')+'万':n;
 
-// subtitle
 const dates=DATA.map(x=>x.d).filter(Boolean).sort();
-$('subtitle').textContent=`共 ${DATA.length} 条素材 · ${dates[0]||''} ~ ${dates[dates.length-1]||''}`;
+$('subtitle').textContent=`共收录 ${DATA.length} 条素材 · ${dates[0]||''} 至 ${dates[dates.length-1]||''}`;
 
-// tabs
 const counts={};DATA.forEach(x=>counts[x.p]=(counts[x.p]||0)+1);
-$('tabs').innerHTML=PLATFORMS.map(p=>{
-  const c=p==='全部'?DATA.length:(counts[p]||0);
-  return `<button class="tab" data-p="${p}">${p}<span class="c">${c}</span></button>`;
+$('tabs').innerHTML=PLATFORMS.map(([key,name])=>{
+  const c=key==='全部'?DATA.length:(counts[key]||0);
+  return `<button class="channel" data-p="${key}">${name}<span class="c">${c}</span></button>`;
 }).join('');
 $('tabs').addEventListener('click',e=>{
-  const b=e.target.closest('.tab');if(!b)return;
+  const b=e.target.closest('.channel');if(!b)return;
   state.p=b.dataset.p;state.tag='';state.page=1;
-  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t===b));
+  document.querySelectorAll('.channel').forEach(t=>t.classList.toggle('active',t===b));
   renderChips();render();
 });
-document.querySelector('.tab').classList.add('active');
+document.querySelector('.channel').classList.add('active');
 
-// tag chips for current platform
 function renderChips(){
   const pool=state.p==='全部'?DATA:DATA.filter(x=>x.p===state.p);
   const tc={};pool.forEach(x=>x.g.forEach(g=>tc[g]=(tc[g]||0)+1));
-  const tags=Object.entries(tc).sort((a,b)=>b[1]-a[1]).slice(0,20);
+  const tags=Object.entries(tc).sort((a,b)=>b[1]-a[1]).slice(0,16);
   $('chips').innerHTML=tags.length?tags.map(([g,c])=>`<button class="chip${g===state.tag?' active':''}" data-g="${esc(g)}">${esc(g)} ${c}</button>`).join(''):'';
 }
 $('chips').addEventListener('click',e=>{
@@ -122,23 +174,24 @@ function filtered(){
   return r;
 }
 
-function card(x){
-  const stats=Object.entries(x.n).filter(([,v])=>v>0).map(([k,v])=>`<span>${k} ${fmtNum(v)}</span>`).join('');
+function item(x,i){
+  const stats=Object.entries(x.n).filter(([,v])=>v>0).map(([k,v])=>`<span>${k} <b>${fmtNum(v)}</b></span>`).join('');
   const tags=x.g.map(g=>`<span class="tag">${esc(g)}</span>`).join('');
-  const ext=Object.entries(x.e||{}).filter(([,v])=>v).map(([k,v])=>`<span>${k} ${esc(v)}</span>`).join('');
-  const inner=`<a class="t" ${x.u?`href="${esc(x.u)}" target="_blank" rel="noopener"`:''}>${esc(x.t)}</a>
-    <div class="meta"><span class="badge">${x.p}</span>${x.a?`<span>${esc(x.a)}</span>`:''}${x.d?`<span>${x.d}</span>`:''}${tags}${ext}</div>
+  const ext=Object.entries(x.e||{}).filter(([,v])=>v).map(([k,v])=>`<span class="tag">${esc(v)}</span>`).join('');
+  return `<div class="item"><div class="idx serif">${String(i+1).padStart(2,'0')}</div><div class="body">
+    <a class="t serif" ${x.u?`href="${esc(x.u)}" target="_blank" rel="noopener"`:''}>${esc(x.t)}</a>
+    <div class="meta"><span class="badge">${NAME_OF[x.p]||x.p}</span>${x.a?(x.h?`<a class="author" href="${esc(x.h)}" target="_blank" rel="noopener">${esc(x.a)}</a>`:`<span>${esc(x.a)}</span>`):''}${x.d?`<span>${x.d}</span>`:''}${tags}${ext}</div>
     ${x.s?`<div class="summary">${esc(x.s)}</div>`:''}
-    ${stats?`<div class="stats">${stats}</div>`:''}`;
-  return `<div class="card">${inner}</div>`;
+    ${stats?`<div class="stats">${stats}</div>`:''}
+  </div>${x.c?`<img class="cover" src="${x.c}" loading="lazy" alt="">`:''}</div>`;
 }
 
 let cur=[];
 function render(){
   cur=filtered();
-  $('count').textContent=`筛选结果 ${cur.length} 条`;
+  $('count').textContent=`共 ${cur.length} 条`;
   const slice=cur.slice(0,state.page*PAGE);
-  $('list').innerHTML=slice.map(card).join('');
+  $('list').innerHTML=slice.map(item).join('');
   $('more').style.display=slice.length<cur.length?'block':'none';
   $('empty').style.display=cur.length?'none':'block';
 }
