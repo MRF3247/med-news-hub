@@ -175,7 +175,8 @@ function itemHTML(it,i,rank){
   const badge=it.g.length?`<a class="badge" href="#/platform/${encodeURIComponent(it.p)}${qs({cat:it.g[0]})}">${esc(it.g[0])}</a>`:'';
   // AI 摘要功能目前只保留 B站（2026-08-25 定稿）
   const ai=(it.r||it.s)&&it.p==='B站'?`<button class="ai-btn" data-ai="${i}">AI 摘要</button>`:'';
-  const head=it.u&&it.p!=='视频号'?`<a href="${esc(it.u)}" target="_blank" rel="noopener"><span class="ttl serif">${esc(it.t)}</span></a>`:`<span class="ttl serif">${esc(it.t)}</span>`;
+  const tgt=it.p==='小红书'?(it.h||it.u):it.u;  // 小红书跳作者主页（防限流登录墙）
+  const head=tgt&&it.p!=='视频号'?`<a href="${esc(tgt)}" target="_blank" rel="noopener"><span class="ttl serif">${esc(it.t)}</span></a>`:`<span class="ttl serif">${esc(it.t)}</span>`;
   const en=it.e&&it.e['原文']?`<div class="meta">${esc(it.e['原文'])}</div>`:'';
   const meta=`<div class="meta">${src}${it.d?`<span> · ${it.d}</span>`:''}${stats?`<span> · ${stats}</span>`:''}${badge}${ai}</div>`;
   if(it.p==='小红书'){
@@ -235,7 +236,7 @@ function renderPlatform(r){
   const link=(over)=>`#/platform/${encodeURIComponent(name)}${qs({sort:r.sort,cat:r.cat,month:r.month,range:r.range,...over})}`;
   let h=`<div class="float"><div class="fhead"><h3 class="serif">热榜 · TOP20</h3>
     <div class="ft">${['7d','30d','all'].map(g=>`<a class="${g===r.range?'on':''}" href="${link({range:g,page:''})}">${g}</a>`).join('')}</div></div>
-    ${top.slice(0,20).map(([x,i],k)=>`<div class="fitem"><span class="frk">${k+1}</span>${x.u&&name!=='视频号'?`<a class="ftitle" href="${esc(x.u)}" target="_blank" rel="noopener">${esc(x.t)}</a>`:`<span class="ftitle">${esc(x.t)}</span>`}${(x.r||x.s)&&x.p==='B站'?`<button class="ai-btn" style="font-size:10px;padding:0 6px" data-ai="${i}">AI</button>`:''}</div>`).join('')}
+    ${top.slice(0,20).map(([x,i],k)=>`<div class="fitem"><span class="frk">${k+1}</span>${(()=>{const t=x.p==='小红书'?(x.h||x.u):x.u;return t&&name!=='视频号'?`<a class="ftitle" href="${esc(t)}" target="_blank" rel="noopener">${esc(x.t)}</a>`:`<span class="ftitle">${esc(x.t)}</span>`;})()}${(x.r||x.s)&&x.p==='B站'?`<button class="ai-btn" style="font-size:10px;padding:0 6px" data-ai="${i}">AI</button>`:''}</div>`).join('')}
   </div>`;
   h+=`<div class="main">
     <div class="filters first"><span class="meta">分类</span>
